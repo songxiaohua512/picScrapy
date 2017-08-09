@@ -1,1 +1,3 @@
 .idea/
+picScrapy/__pycache__/
+picScrapy/spiders/__pycache__/
