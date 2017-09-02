@@ -13,3 +13,11 @@ class PicscrapyItem(scrapy.Item):
     images = scrapy.Field()
     title = scrapy.Field()
     category_name = scrapy.Field()
+
+
+class TccscrapyItem(scrapy.Item):
+    name = scrapy.Field()
+    price = scrapy.Field()
+    sales = scrapy.Field()
+    location = scrapy.Field()
+    seller = scrapy.Field()
