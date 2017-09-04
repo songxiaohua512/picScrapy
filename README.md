@@ -1,5 +1,5 @@
 # picScrapy
-此爬虫可以爬取该站(http://www.jj20.com)所有分类图片，仅作实验和参考，请勿用于其他用途,在Ubuntu系统Python3环境下完美运行
+此爬虫可以爬取[http://www.jj20.com](http://www.jj20.com)所有分类图片，仅作实验和参考，请勿用于其他用途,在Ubuntu系统Python3环境下完美运行
 
 1. 一些设置
 ```
