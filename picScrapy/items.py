@@ -15,9 +15,13 @@ class PicscrapyItem(scrapy.Item):
     category_name = scrapy.Field()
 
 
-class TccscrapyItem(scrapy.Item):
-    name = scrapy.Field()
+# 商品数据
+class AfscrapyItem(scrapy.Item):
+    goods_id = scrapy.Field()
+    shop_name = scrapy.Field()
+    category_name = scrapy.Field()
+    title = scrapy.Field()
+    sales_num = scrapy.Field()
+    unit = scrapy.Field()
     price = scrapy.Field()
-    sales = scrapy.Field()
     location = scrapy.Field()
-    seller = scrapy.Field()
