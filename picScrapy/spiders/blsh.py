@@ -22,22 +22,20 @@ class PicSpider(Spider):
 
     # 一级页面的处理函数
     def parse(self, response):
-        # 提取界面所有的符合入口条件的url
-        all_urls = response.xpath('//div[@class="tit_sort"]//dl//li//em')
+        all_urls = response.xpath('//div[@class="tit_sort"]//dl')
         if len(all_urls):
-            # 遍历获得的url，继续爬取
             for url in all_urls:
-                # urljoin生成完整url地址
-                category_name = url.xpath('a/text()').extract()[0]
-                url = url.xpath('a/@href').extract()[0]
-                class_id = re.search("list-(\d+)-(\d+)-(\d+)", url)
-                c1 = class_id.group(1)
-                c2 = class_id.group(2)
-                c3 = class_id.group(3)
-                next_url = "http://www.benlai.com/NewCategory/GetLuceneProduct"
-                yield FormRequest(next_url, formdata={"c1": c1, "c2": c2, "c3": c3, "page": "1"},
-                                  callback=self.parse_data,
-                                  meta={"cat": category_name, "c1": c1, "c2": c2, "c3": c3, "page": "1"})
+                category_name = url.xpath('./dt/a/text()').extract()[0]
+                next_urls = url.xpath('.//em//a/@href').extract()
+                for next_url in next_urls:
+                    class_id = re.search("list-(\d+)-(\d+)-(\d+)", next_url)
+                    c1 = class_id.group(1)
+                    c2 = class_id.group(2)
+                    c3 = class_id.group(3)
+                    next_url = "http://www.benlai.com/NewCategory/GetLuceneProduct"
+                    yield FormRequest(next_url, formdata={"c1": c1, "c2": c2, "c3": c3, "page": "1"},
+                                      callback=self.parse_data,
+                                      meta={"cat": category_name, "c1": c1, "c2": c2, "c3": c3, "page": "1"})
 
     # 二级页面的处理函数
     def parse_data(self, response):

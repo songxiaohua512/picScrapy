@@ -23,11 +23,8 @@ class PicSpider(Spider):
 
     # 一级页面的处理函数
     def parse(self, response):
-        # 提取界面所有的符合入口条件的url
         all_cat = json.loads(response.body.decode('utf-8'))
-        # 遍历获得的url，继续爬取
         for cat in all_cat['data']['categoryInfo']['categorys'][1:]:
-            # urljoin生成完整url地址
             for cmCatId in cat['childCmCategories']:
                 for cmCatIdId in cmCatId['childCmCategories']:
                     next_url = 'https://gatewx.dmall.com/customersite/searchWareByCategory?' \
@@ -45,7 +42,7 @@ class PicSpider(Spider):
         for data in datas['data']['list']:
             item['goods_id'] = data['skuId']
             item['shop_name'] = data['shop']
-            item['category_name'] = data['secondCatName']
+            item['category_name'] = data['firstCatName']
             item['title'] = data['title']
             item['sales_num'] = 0
             item['unit'] = ""

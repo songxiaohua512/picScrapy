@@ -23,19 +23,16 @@ class PicSpider(Spider):
 
     # 一级页面的处理函数
     def parse(self, response):
-        # 提取界面所有的符合入口条件的url
-        all_urls = response.xpath('//div[@role="tabpanel"]//li')
-        if len(all_urls):
-            # 遍历获得的url，继续爬取
+        parent_path = response.xpath('//section[@id="m-category"]')
+        for i in range(1, 9):
+            category_name = parent_path.xpath("./ul/li["+str(i)+"]/a/text()").extract()[0]
+            all_urls = parent_path.xpath(".//div/div["+str(i)+"]/ul/li/a/@href").extract()
             for url in all_urls:
-                # urljoin生成完整url地址
-                category_name = url.xpath('a/text()').extract()[0]
-                url = url.xpath('a/@href').extract()[0]
                 class_id = re.search('\d+', url).group()
                 next_url = "http://m.fruitday.com/ajax/prolist/index"
                 yield FormRequest(next_url, formdata={"class_id": class_id, "curr_page": "0"},
                                   callback=self.parse_data,
-                                  meta={"cat": category_name, "class_id": class_id, 'page': 0})
+                                  meta={"cat": category_name, "class_id": class_id, 'page': "0"})
 
     # 二级页面的处理函数
     def parse_data(self, response):
