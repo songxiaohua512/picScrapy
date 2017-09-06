@@ -26,20 +26,28 @@ class PicSpider(Spider):
             category_name = url.xpath(".//h3/a/text()").extract()[0]
             next_urls = url.xpath(".//em/a/@href").extract()
             for next_url in next_urls:
-                yield Request('http://www.egu365.com'+next_url, callback=self.parse_data, meta={"cat": category_name})
+                yield Request('http://www.egu365.com' + next_url, callback=self.parse_data, meta={"cat": category_name})
 
     # 二级页面的处理函数
-    @staticmethod
-    def parse_data(response):
-        item = AfscrapyItem()
+    def parse_data(self, response):
         datas = response.xpath('//div[@class="list-nr-ri-content"]//li')
         for data in datas:
-            item['goods_id'] = data.xpath('.//div[@class="he-view"]/a/@goods').extract()[0]
-            item['shop_name'] = "自营"
-            item['category_name'] = response.meta["cat"]
-            item['title'] = data.xpath('.//div[@class="wz"]/a/text()').extract()[0]
-            item['sales_num'] = 0
-            item['unit'] = ""
-            item['price'] = re.search('(\d+).(\d+)', data.xpath('.//div[@class="list-price"]/b/text()').extract()[0]).group()
-            item['location'] = ""
-            yield item
+            next_url = 'http://www.egu365.com' + data.xpath('.//div[@class="he-wrap tpl5"]/a/@href').extract()[0]
+            goods_id = data.xpath('//div[@class="he-view"]/a/@goods').extract()[0]
+            yield Request(next_url, callback=self.parse_detail,
+                          meta={"cat": response.meta['cat'], "goods_id": goods_id})
+
+    @staticmethod
+    def parse_detail(response):
+        item = AfscrapyItem()
+        item['goods_id'] = response.meta['goods_id']
+        item['shop_name'] = "自营"
+        item['category_name'] = response.meta["cat"]
+        item['title'] = response.xpath('//div[@class="list-details-lf-pro-ri"]/div/text()').extract()[0]
+        item['sales_num'] = response.xpath('//div[@class="detail-pro-cx"]//em[@class="text-yellow"]/text()').extract()[0]
+        item['unit'] = response.xpath(
+            '//div[@class="list-details-lf-pro-ri"]//div[@class="detail-pro-zl"]/div[2]/text()').extract()[0]
+        item['price'] = re.search('(\d+).(\d+)', response.xpath(
+            '//div[@class="list-details-lf-pro-ri"]//div[@class="detail-pro-price"]//b/text()').extract()[0]).group()
+        item['location'] = ""
+        yield item
