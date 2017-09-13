@@ -39,19 +39,30 @@ class PicSpider(Spider):
             name = data.xpath('.//div[@class="p-name"]/text()')
             if len(name) == 2:
                 item['shop_name'] = data.xpath('.//div[@class="p-name"]/span/text()').extract()[0]
-                item['title'] = re.search('([\u4E00-\u9FA5]+\s)+',
+                item['title'] = re.search('([\u4E00-\u9FA5]+[A-Za-z]*\s?)+',
                                           data.xpath('.//div[@class="p-name"]/text()').extract()[1]).group()
             else:
-                item['shop_name'] = re.search('[\u4E00-\u9FA5]+', data.xpath('.//div[@class="p-name"]/text()').extract()[0]).group()
-                item['title'] = data.xpath('.//div[@class="p-name"]/text()').extract()[0]
-            item['sales_num'] = re.search(r'\d+', data.xpath('.//div[@class="p-gray-info"]/text()').extract()[1]).group()
-            item['unit'] = re.search('\d+.+', data.xpath('.//div[@class="p-name"]/text()').extract()[1]).group()
+                item['shop_name'] = re.search('[\u4E00-\u9FA5]+',
+                                              data.xpath('.//div[@class="p-name"]/text()').extract()[0]).group()
+                item['title'] = re.search('([\u4E00-\u9FA5]+[A-Za-z]*\s?)+',
+                                          data.xpath('.//div[@class="p-name"]/text()').extract()[0]).group()
+            sales_num = data.xpath('.//div[@class="p-gray-info"]/text()').extract()
+            if len(sales_num) > 1:
+                item['sales_num'] = re.search(r'\d+', sales_num[1]).group()
+            else:
+                item['sales_num'] = 0
+
+            unit = data.xpath('.//div[@class="p-name"]/text()').extract()
+            if len(unit) > 1:
+                item['unit'] = re.search('\d+.+', unit[1]).group()
+            else:
+                item['unit'] = ""
             item['price'] = data.xpath('.//div[@class="p-price fl"]/span/text()').extract()[0] + \
                 data.xpath('.//div[@class="p-price fl"]/text()').extract()[1]
-            item['location'] = re.search('[\u4E00-\u9FA5]+', data.xpath('.//div[@class="p-gray-info"]/text()').extract()[0]).group()
+            item['location'] = re.search('[\u4E00-\u9FA5]*',
+                                         data.xpath('.//div[@class="p-gray-info"]/text()').extract()[0]).group()
             yield item
-            next_page = int(response.meta['page']) + 1
-            yield FormRequest(response.url, formdata={"class_id": response.meta["class_id"], "curr_page": str(next_page)},
-                              callback=self.parse_data,
-                              meta={"cat": response.meta["cat"],
-                                    "class_id": response.meta["class_id"], "page": next_page})
+            next_page = re.search('pageNo=(\d+)', response.url).group(1)
+            next_page = 'pageNo='+str(int(next_page)+1)
+            next_url = re.sub('pageNo=\d+', next_page, response.url)
+            yield Request(next_url, callback=self.parse_data, meta={"cat": response.meta["cat"]})
